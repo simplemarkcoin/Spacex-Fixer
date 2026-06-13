@@ -1,22 +1,41 @@
 /**
- * Seed the Neon database with SpaceX member data.
+ * Seed the database with SpaceX member data.
  * Run: node scripts/seed.mjs
  * Safe to run multiple times — uses ON CONFLICT DO NOTHING.
+ *
+ * DATABASE_URL is read from (in order):
+ *   1. Environment variable already set in the shell
+ *   2. .env.local file in the project root
  */
 
 import pg from 'pg'
-import { readFileSync } from 'fs'
+import { readFileSync, existsSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dir = dirname(fileURLToPath(import.meta.url))
 
-// Load .env.local manually
-const envPath = resolve(__dir, '../.env.local')
-const envLines = readFileSync(envPath, 'utf8').split('\n')
-for (const line of envLines) {
-  const [key, ...rest] = line.split('=')
-  if (key && rest.length) process.env[key.trim()] = rest.join('=').trim()
+// Load .env.local only if DATABASE_URL isn't already in the environment
+if (!process.env.DATABASE_URL) {
+  const envPath = resolve(__dir, '../.env.local')
+  if (existsSync(envPath)) {
+    const lines = readFileSync(envPath, 'utf8').split('\n')
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const eqIdx = trimmed.indexOf('=')
+      if (eqIdx === -1) continue
+      const key = trimmed.slice(0, eqIdx).trim()
+      const val = trimmed.slice(eqIdx + 1).trim()
+      if (key) process.env[key] = val
+    }
+  }
+}
+
+if (!process.env.DATABASE_URL) {
+  console.error('ERROR: DATABASE_URL is not set.')
+  console.error('  Set it in .env.local or export it in your shell before running this script.')
+  process.exit(1)
 }
 
 const { Pool } = pg
