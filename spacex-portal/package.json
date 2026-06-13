@@ -9,7 +9,11 @@
     "lint": "eslint .",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:seed": "node scripts/seed.mjs",
+    "test:api": "node scripts/test-api.mjs",
+    "test:api:both": "node scripts/test-api.mjs --both",
+    "test:api:express": "node scripts/test-api.mjs --express"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

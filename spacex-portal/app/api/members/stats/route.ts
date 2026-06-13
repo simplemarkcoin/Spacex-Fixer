@@ -4,8 +4,10 @@ import { httpStatus } from '@/backend/errors'
 
 export async function GET() {
   const result = await getMemberStats()
-  if (!result.ok) {
-    return NextResponse.json({ ok: false, error: result }, { status: httpStatus(result.code) })
-  }
+  if (!result.ok)
+    return NextResponse.json(
+      { ok: false, code: result.code, message: result.message },
+      { status: httpStatus(result.code) },
+    )
   return NextResponse.json({ ok: true, data: result.data })
 }

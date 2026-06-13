@@ -14,8 +14,10 @@ export async function GET(request: Request) {
     offset: searchParams.get('offset') ? Number(searchParams.get('offset')) : undefined,
   })
 
-  if (!result.ok) {
-    return NextResponse.json({ ok: false, error: result }, { status: httpStatus(result.code) })
-  }
+  if (!result.ok)
+    return NextResponse.json(
+      { ok: false, code: result.code, message: result.message },
+      { status: httpStatus(result.code) },
+    )
   return NextResponse.json({ ok: true, data: result.data })
 }

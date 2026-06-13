@@ -25,20 +25,19 @@ function handleError(res: Response, error: unknown): Response {
       .join("; ");
     return res
       .status(400)
-      .json({ ok: false, error: { code: "VALIDATION_ERROR", message } });
+      .json({ ok: false, code: "VALIDATION_ERROR", message });
   }
   if (isUniqueViolation(error)) {
     return res.status(400).json({
       ok: false,
-      error: {
-        code: "VALIDATION_ERROR",
-        message: "A member with this email already exists",
-      },
+      code: "VALIDATION_ERROR",
+      message: "A member with this email already exists",
     });
   }
   return res.status(500).json({
     ok: false,
-    error: { code: "SERVER_ERROR", message: "An unexpected error occurred" },
+    code: "SERVER_ERROR",
+    message: "An unexpected error occurred",
   });
 }
 
@@ -178,7 +177,7 @@ router.get("/:id", async (req, res) => {
     if (!row) {
       return res
         .status(404)
-        .json({ ok: false, error: { code: "NOT_FOUND", message: "Member not found" } });
+        .json({ ok: false, code: "NOT_FOUND", message: "Member not found" });
     }
     return res.json({ ok: true, data: toMember(row) });
   } catch (e) {
@@ -220,7 +219,7 @@ router.put("/:id", async (req, res) => {
     if (!row) {
       return res
         .status(404)
-        .json({ ok: false, error: { code: "NOT_FOUND", message: "Member not found" } });
+        .json({ ok: false, code: "NOT_FOUND", message: "Member not found" });
     }
     return res.json({ ok: true, data: toMember(row) });
   } catch (e) {
@@ -238,7 +237,7 @@ router.delete("/:id", async (req, res) => {
     if (!row) {
       return res
         .status(404)
-        .json({ ok: false, error: { code: "NOT_FOUND", message: "Member not found" } });
+        .json({ ok: false, code: "NOT_FOUND", message: "Member not found" });
     }
     return res.json({ ok: true, data: { id: row.id } });
   } catch (e) {
