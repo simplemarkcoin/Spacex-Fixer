@@ -5,7 +5,9 @@
  * SpaceX Member Portal API
  * OpenAPI spec version: 0.1.0
  */
+import type { ApiErrorError } from './apiErrorError';
 
-export interface HealthStatus {
-  status: string;
+export interface ApiError {
+  ok: boolean;
+  error: ApiErrorError;
 }

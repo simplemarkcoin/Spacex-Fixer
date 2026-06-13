@@ -5,7 +5,9 @@
  * SpaceX Member Portal API
  * OpenAPI spec version: 0.1.0
  */
+import type { MemberStats } from './memberStats';
 
-export interface HealthStatus {
-  status: string;
+export interface MemberStatsResponse {
+  ok: boolean;
+  data: MemberStats;
 }

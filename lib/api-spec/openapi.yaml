@@ -3,13 +3,15 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: SpaceX Member Portal API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: members
+    description: Member management
 paths:
   /healthz:
     get:
@@ -24,6 +26,177 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /members:
+    get:
+      operationId: listMembers
+      tags: [members]
+      summary: List all members
+      description: Returns all members ordered by most recently created
+      responses:
+        "200":
+          description: Members list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberListResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    post:
+      operationId: createMember
+      tags: [members]
+      summary: Create a member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMemberInput"
+      responses:
+        "201":
+          description: Created member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /members/stats:
+    get:
+      operationId: getMemberStats
+      tags: [members]
+      summary: Member statistics
+      description: Returns aggregate counts by status, tier, and role
+      responses:
+        "200":
+          description: Member statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberStatsResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /members/search:
+    get:
+      operationId: searchMembers
+      tags: [members]
+      summary: Search and filter members
+      parameters:
+        - name: query
+          in: query
+          description: Search by name or email (case-insensitive)
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            $ref: "#/components/schemas/MemberStatus"
+        - name: tier
+          in: query
+          description: Filter by membership tier
+          schema:
+            $ref: "#/components/schemas/MemberTier"
+        - name: role
+          in: query
+          description: Filter by role
+          schema:
+            $ref: "#/components/schemas/MemberRole"
+        - name: limit
+          in: query
+          description: Max results to return (default 50)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: offset
+          in: query
+          description: Number of results to skip (for pagination)
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberSearchResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /members/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Member UUID
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getMember
+      tags: [members]
+      summary: Get a member by ID
+      responses:
+        "200":
+          description: Member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    put:
+      operationId: updateMember
+      tags: [members]
+      summary: Update a member
+      description: Partial update — only provided fields are changed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMemberInput"
+      responses:
+        "200":
+          description: Updated member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    delete:
+      operationId: deleteMember
+      tags: [members]
+      summary: Delete a member
+      responses:
+        "200":
+          description: Deleted member ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeletedResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +207,284 @@ components:
       required:
         - status
 
+    MemberStatus:
+      type: string
+      enum: [ACTIVE, PENDING, SUSPENDED]
+
+    MemberTier:
+      type: string
+      enum: [Explorer, Pioneer, Vanguard]
+
+    MemberRole:
+      type: string
+      enum: [member, admin]
+
+    Member:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        tier:
+          $ref: "#/components/schemas/MemberTier"
+        status:
+          $ref: "#/components/schemas/MemberStatus"
+        role:
+          $ref: "#/components/schemas/MemberRole"
+        title:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        member_since:
+          type: string
+          format: date
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - name
+        - tier
+        - status
+        - role
+        - created_at
+        - updated_at
+
+    MemberListItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        tier:
+          $ref: "#/components/schemas/MemberTier"
+        status:
+          $ref: "#/components/schemas/MemberStatus"
+        role:
+          $ref: "#/components/schemas/MemberRole"
+        member_since:
+          type: string
+          format: date
+          nullable: true
+      required:
+        - id
+        - email
+        - name
+        - tier
+        - status
+        - role
+
+    CreateMemberInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          minLength: 1
+        tier:
+          $ref: "#/components/schemas/MemberTier"
+        status:
+          $ref: "#/components/schemas/MemberStatus"
+        role:
+          $ref: "#/components/schemas/MemberRole"
+        title:
+          type: string
+        location:
+          type: string
+        member_since:
+          type: string
+          format: date
+      required:
+        - email
+        - name
+
+    UpdateMemberInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          minLength: 1
+        tier:
+          $ref: "#/components/schemas/MemberTier"
+        status:
+          $ref: "#/components/schemas/MemberStatus"
+        role:
+          $ref: "#/components/schemas/MemberRole"
+        title:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        member_since:
+          type: string
+          format: date
+          nullable: true
+
+    MemberStats:
+      type: object
+      properties:
+        totalMembers:
+          type: integer
+        activeMembers:
+          type: integer
+        pendingMembers:
+          type: integer
+        suspendedMembers:
+          type: integer
+        adminCount:
+          type: integer
+        tierBreakdown:
+          type: object
+          properties:
+            explorer:
+              type: integer
+            pioneer:
+              type: integer
+            vanguard:
+              type: integer
+          required:
+            - explorer
+            - pioneer
+            - vanguard
+      required:
+        - totalMembers
+        - activeMembers
+        - pendingMembers
+        - suspendedMembers
+        - adminCount
+        - tierBreakdown
+
+    MemberResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        data:
+          $ref: "#/components/schemas/Member"
+      required:
+        - ok
+        - data
+
+    MemberListResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Member"
+      required:
+        - ok
+        - data
+
+    MemberSearchResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        data:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/MemberListItem"
+            total:
+              type: integer
+          required:
+            - data
+            - total
+      required:
+        - ok
+        - data
+
+    MemberStatsResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        data:
+          $ref: "#/components/schemas/MemberStats"
+      required:
+        - ok
+        - data
+
+    DeletedResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+          required:
+            - id
+      required:
+        - ok
+        - data
+
+    ApiError:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+          required:
+            - code
+            - message
+      required:
+        - ok
+        - error
+
+  responses:
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
