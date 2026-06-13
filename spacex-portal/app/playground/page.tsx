@@ -32,7 +32,7 @@ export default function PlaygroundPage() {
     if (isSuccess(result)) {
       setStats(result.data)
     } else if (isFailure(result)) {
-      setError(result.error.message)
+      setError(result.message)
       setStats(null)
     }
 
@@ -64,7 +64,7 @@ export default function PlaygroundPage() {
       setForm(initialForm)
       await loadStats()
     } else if (isFailure(result)) {
-      setMessage(result.error.message)
+      setMessage(result.message)
     }
 
     setCreating(false)

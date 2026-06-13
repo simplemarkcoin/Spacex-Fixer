@@ -25,7 +25,8 @@ async function apiFetch<T>(url: string, init?: RequestInit): Promise<ApiResult<T
   } catch (e) {
     return {
       ok: false,
-      error: { code: 'NETWORK_ERROR', message: e instanceof Error ? e.message : 'Network error' },
+      code: 'NETWORK_ERROR',
+      message: e instanceof Error ? e.message : 'Network error',
     }
   }
 }

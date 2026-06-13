@@ -14,7 +14,9 @@
     "db:setup": "node scripts/setup.mjs",
     "test:api": "node scripts/test-api.mjs",
     "test:api:both": "node scripts/test-api.mjs --both",
-    "test:api:express": "node scripts/test-api.mjs --express"
+    "test:api:express": "node scripts/test-api.mjs --express",
+    "test:lifecycle": "node scripts/test-lifecycle.mjs",
+    "test:lifecycle:express": "node scripts/test-lifecycle.mjs --express"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

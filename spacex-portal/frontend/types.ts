@@ -63,7 +63,8 @@ export interface ApiOk<T> {
 
 export interface ApiError {
   ok: false
-  error: { code: string; message: string }
+  code: string
+  message: string
 }
 
 export type ApiResult<T> = ApiOk<T> | ApiError
