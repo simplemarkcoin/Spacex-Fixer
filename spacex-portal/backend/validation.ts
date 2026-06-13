@@ -38,4 +38,5 @@ export const searchMembersSchema = z.object({
 
 export type CreateMemberInput = z.infer<typeof createMemberSchema>
 export type UpdateMemberInput = z.infer<typeof updateMemberSchema>
-export type SearchMembersInput = z.infer<typeof searchMembersSchema>
+// z.input gives the *before-parse* shape so fields with .default() are optional
+export type SearchMembersInput = z.input<typeof searchMembersSchema>

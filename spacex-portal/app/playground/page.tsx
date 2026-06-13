@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createMember, getMemberStats } from '@/frontend/api'
 import { isFailure, isSuccess } from '@/frontend/response'
+import type { MemberStats } from '@/frontend/types'
 
 const initialForm = {
   email: 'new-member@example.com',
@@ -18,7 +19,7 @@ const initialForm = {
 export default function PlaygroundPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof getMemberStats>>['data'] | null>(null)
+  const [stats, setStats] = useState<MemberStats | null>(null)
   const [form, setForm] = useState(initialForm)
   const [creating, setCreating] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
